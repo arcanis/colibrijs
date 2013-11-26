@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+
+        <meta charset="utf-8" />
+
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Gudea:400,700" />
+        <link rel="stylesheet" href="index.css" />
+
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-resource.js"></script>
+        <script src="../colibri.js"></script>
+
+        <script>
+            angular.module( 'app', [ 'ngResource' ] )
+
+            .factory( 'imgur', function ( $http ) {
+                return function ( ) {
+                    return $http.get( 'https://api.imgur.com/3/gallery/r/nature', {
+                        headers : { 'Authorization' : 'Client-ID f6a30f8817dfaa1' }
+                    } );
+                };
+            } )
+
+            .factory( 'colibri', function ( $rootScope ) {
+                return function ( url ) {
+
+                    var image = new Image( ), colors = { };
+
+                    image.addEventListener( 'load', function ( ) {
+                        $rootScope.$apply( function ( ) {
+                            var result = Colibri.extractImageColors( image, 'css' );
+                            Object.keys( result ).forEach( function ( key ) {
+                                colors[ key ] = result[ key ];
+                            } );
+                        } );
+                    } );
+
+                    image.crossOrigin = 'Anonymous';
+                    image.src = url;
+                    return colors;
+
+                };
+            } )
+
+            .controller( 'main', function ( $scope, imgur, colibri ) {
+                imgur( ).then( function ( xhr ) {
+                    $scope.albums = xhr.data.data.map( function ( entry ) {
+
+                        var index = entry.link.lastIndexOf( '.' );
+                        var cover = entry.link.substr( 0, index ) + 'b' + entry.link.substr( index );
+
+                        return { name : entry.title, cover : cover, colors : colibri( cover ), tracks : [
+                            'All the Wrong Places',
+                            'Changed the Way You Kiss Me',
+                            'Close Enemies',
+                            'Come Taste The Rainbow',
+                            'Crying Out For Help',
+                            'Kickstarts',
+                            'Last Ones Standing',
+                            'Microphone',
+                            'Midnight Run',
+                            'Millionaires',
+                            'Natural Disaster'
+                        ] };
+
+                    } );
+                } );
+            } );
+        </script>
+
+    </head>
+    <body ng-app="app" ng-controller="main">
+
+        <ul class="albums">
+            <li ng-repeat="album in albums" class="album" ng-style="{ background : album.colors.background }">
+                <div class="container">
+                    <img ng-src="{{ album.cover }}" class="cover" />
+                    <div class="infos">
+                        <h1 class="name" ng-style="{ color : album.colors.content[ 0 ] }">
+                            {{ album.name }}
+                        </h1>
+                        <ol class="tracks" ng-style="{ color : album.colors.content[ 1 ] }">
+                            <li ng-repeat="track in album.tracks" class="track">
+                                <span class="index" ng-style="{ color : album.colors.content[ 0 ] }">{{ $index }}.</span> {{ track }}
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+    </body>
+</html>

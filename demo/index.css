@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body, ul, ol {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Gudea;
+}
+
+.albums {
+    list-style-type: none;
+}
+
+.container {
+    width: 600px;
+    margin: auto;
+
+    padding: 20px 0;
+
+    font-size: 0;
+}
+
+.container::before, .container::after {
+    display: table;
+    content: '';
+}
+
+.container::after {
+    clear: both;
+}
+
+.preview {
+    display: block;
+    float: right;
+
+    width: 160px;
+}
+
+.infos {
+    display: block;
+    float: left;
+
+    margin-right: 40px;
+
+    width: 400px;
+
+    font-size: 17px;
+
+    white-space: nowrap;
+}
+
+.name, .track {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.name {
+    margin: 0;
+    margin-bottom: 15px;
+
+    font-weight: bold;
+    font-size: 23px;
+}
+
+.tracks {
+    list-style-type: decimal-leading-zero;
+}
+
+.index {
+    display: inline-block;
+
+    width: 45px;
+}
