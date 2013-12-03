@@ -23,6 +23,10 @@ img.src = 'http://i.imgur.com/OUmDIOqb.jpg';
 
 ## Performances
 
+You should be aware of performance issue on a large number of images on some devices such as iPad. I think it would be for the best if you could precompute the colors and store them somewhere. I plan to publish this library as a NPM package, don't forget to star the repo to be notified of further updates.
+
+<hr />
+
 Use this script on **little** images (thumbnail-like). If necessary, you can resize the images yourself :
 
 ```js
