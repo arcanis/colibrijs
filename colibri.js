@@ -13,11 +13,26 @@ var Colibri = ( function ( ) {
         return Math.pow( n, 2 ); };
 
     var filters = {
+
+        'hex' : function ( color ) {
+
+            var hexComponent = function ( n ) {
+                var value = Math.floor( 255 * n ).toString( 16 );
+                return value.length === 1 ? '0' + value : value;
+            };
+
+            return '#' + color.map( hexComponent ).join( '' );
+
+        },
+
         'css' : function ( color ) {
+
             return 'rgb(' + color.map( function ( n ) {
                 return Math.floor( 255 * n );
             } ).join( ',' ) + ')';
+
         }
+
     };
 
     var rgbToYuv = function ( rgb ) {
