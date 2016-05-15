@@ -2,9 +2,9 @@
 
 Colibrijs is a small library that can extract the dominant colors from any image.
 
-![Examples](http://i.imgur.com/YPxA3.png)
-
 The algorithm used in the library has been ported over from the following [StackOverflow answer](http://stackoverflow.com/questions/13637892/how-does-the-algorithm-to-color-the-song-list-in-itunes-11-work#answer-13675803).
+
+![Examples](http://i.imgur.com/YPxA3.png)
 
 ## Installation
 
