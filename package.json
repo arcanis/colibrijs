@@ -1,0 +1,6 @@
+{
+  "name": "colibrijs",
+  "description": "Extract dominant colors from an image",
+  "version": "1.0.0",
+  "main": "./colibri.js"
+}
