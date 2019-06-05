@@ -28,6 +28,9 @@ var Colibri = (function () {
 
         'hex': function (color) {
 
+            if (color === null)
+                return null;
+
             var hexComponent = function (n) {
                 var value = Math.floor(255 * n).toString(16);
                 return value.length === 1 ? '0' + value : value;
@@ -39,11 +42,26 @@ var Colibri = (function () {
 
         'css': function (color) {
 
+            if (color === null)
+                return null;
+
             return 'rgb(' + color.map(function (n) {
                 return Math.floor(255 * n);
             }).join(',') + ')';
 
         }
+
+    };
+
+    var rgbToInt = function (rgb) {
+
+        return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+
+    };
+
+    var hexToInt = function (hex) {
+
+        return parseInt(hex.slice(1), 16);
 
     };
 
@@ -66,6 +84,9 @@ var Colibri = (function () {
     };
 
     var colorBrightness = function (rgb) {
+
+        if (rgb === null)
+            return null;
 
         return sqrt(pow(rgb[0]) * 0.241 + pow(rgb[1]) * 0.691 + pow(rgb[2]) * 0.068);
 
@@ -134,7 +155,9 @@ var Colibri = (function () {
             return bucketB.length - bucketA.length;
         });
 
-        var color = meanColor(buckets.shift());
+        var color = buckets.length > 0
+            ? meanColor(buckets.shift())
+            : null;
 
         if (count === null)
             return color;
@@ -154,23 +177,41 @@ var Colibri = (function () {
             return document.createElement('canvas');
 
         if (typeof require !== 'undefined')
-            return new (require('canvas'))();
+            return new (require('canvas').Canvas)();
 
         throw new Error('Canvas creation failed');
 
     };
 
-    var loadDataFromContext = function (destination, context, x, y, width, height) {
+    var loadDataFromContext = function (destination, context, x, y, width, height, ignoredColors) {
 
         var data = context.getImageData(x, y, width, height).data;
+        var transparent = false;
 
         for (var t = 0, T = data.length; t < T; t += 4) {
+
+            if (data[t + 3] === 0) {
+                transparent = true;
+                continue;
+            }
+
+            if (ignoredColors && ignoredColors.has((data[t + 0] << 16) | (data[t + 1] << 8) | (data[t + 2] << 0)))
+                continue;
+
             destination.push([ data[t + 0] / 255, data[t + 1] / 255, data[t + 2] / 255 ]);
+
         }
+
+        return transparent;
 
     };
 
-    var extractImageColors = function (image, filter) {
+    var extractImageColors = function (image, options) {
+
+        if (typeof options === 'undefined')
+            options = 'hex';
+        if (typeof options === 'string')
+            options = {outputType: options};
 
         var canvas = createCanvas();
         var context = canvas.getContext('2d');
@@ -180,16 +221,27 @@ var Colibri = (function () {
 
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+        var ignoredColors = options.ignoredColors ? new Set(options.ignoredColors.map(function (hex) {
+            return hexToInt(hex);
+        })) : null;
+
         var borderImageData = [];
-        loadDataFromContext(borderImageData, context, 0, 0, canvas.width - 1, 1);
-        loadDataFromContext(borderImageData, context, canvas.width - 1, 0, 1, canvas.height - 1);
-        loadDataFromContext(borderImageData, context, 0, 1, 1, canvas.height - 1);
-        loadDataFromContext(borderImageData, context, 1, canvas.height - 1, canvas.width - 1, 1);
+        var transparentBorder = false;
+
+        transparentBorder = loadDataFromContext(borderImageData, context, 0, 0, canvas.width - 1, 1, ignoredColors) || transparentBorder;
+        transparentBorder = loadDataFromContext(borderImageData, context, canvas.width - 1, 0, 1, canvas.height - 1, ignoredColors) || transparentBorder;
+        transparentBorder = loadDataFromContext(borderImageData, context, 0, 1, 1, canvas.height - 1, ignoredColors) || transparentBorder;
+        transparentBorder = loadDataFromContext(borderImageData, context, 1, canvas.height - 1, canvas.width - 1, 1, ignoredColors) || transparentBorder;
+
+        if (transparentBorder)
+            borderImageData = [];
 
         var fullImageData = [];
-        loadDataFromContext(fullImageData, context, 0, 0, canvas.width, canvas.height);
+        loadDataFromContext(fullImageData, context, 0, 0, canvas.width, canvas.height, ignoredColors);
 
-        var backgroundColor = dominantColor(borderImageData, .1);
+        var backgroundColor = borderImageData.length > 0
+            ? dominantColor(borderImageData, .1)
+            : dominantColor(fullImageData, .1);
 
         var contentColors = dominantColor(fullImageData, .1, -1).filter(function (color) {
 
@@ -206,8 +258,12 @@ var Colibri = (function () {
 
         }, []);
 
-        if (filter && typeof filter !== 'function')
-            filter = filters[filter];
+        if (contentColors.length === 0)
+            contentColors.push(colorBrightness(backgroundColor) >= 0.5 ? [0, 0, 0] : [1, 1, 1]);
+
+        var filter = options.outputType && typeof options.outputType === 'string'
+            ? filters[options.outputType]
+            : options.outputType;
 
         if (filter) {
             backgroundColor = filter(backgroundColor);
