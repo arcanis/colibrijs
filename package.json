@@ -5,6 +5,10 @@
   "peerDependencies": {
     "react": "*"
   },
+  "repository": {	
+    "type": "git",
+    "url": "https://github.com/arcanis/colibrijs.git"
+  },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
