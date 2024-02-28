@@ -1,23 +1,5 @@
 var Colibri = (function () {
 
-    var floor = function (n) {
-
-        return Math.floor(n);
-
-    };
-
-    var abs = function (n) {
-
-        return Math.abs(n);
-
-    };
-
-    var sqrt = function (n) {
-
-        return Math.sqrt(n);
-
-    };
-
     var pow = function (n) {
 
         return Math.pow(n, 2);
@@ -79,7 +61,7 @@ var Colibri = (function () {
 
         var yuv1 = rgbToYuv(rgb1), yuv2 = rgbToYuv(rgb2);
 
-        return sqrt(pow(yuv1[0] - yuv2[0]) + pow(yuv1[1] - yuv2[1]) + pow(yuv1[2] - yuv2[2]));
+        return Math.sqrt(pow(yuv1[0] - yuv2[0]) + pow(yuv1[1] - yuv2[1]) + pow(yuv1[2] - yuv2[2]));
 
     };
 
@@ -88,7 +70,7 @@ var Colibri = (function () {
         if (rgb === null)
             return null;
 
-        return sqrt(pow(rgb[0]) * 0.241 + pow(rgb[1]) * 0.691 + pow(rgb[2]) * 0.068);
+        return Math.sqrt(pow(rgb[0]) * 0.241 + pow(rgb[1]) * 0.691 + pow(rgb[2]) * 0.068);
 
     };
 
@@ -245,7 +227,7 @@ var Colibri = (function () {
 
         var contentColors = dominantColor(fullImageData, .1, -1).filter(function (color) {
 
-            return abs(colorBrightness(backgroundColor) - colorBrightness(color)) > .4;
+            return Math.abs(colorBrightness(backgroundColor) - colorBrightness(color)) > .4;
 
         }).reduce(function (filteredContentColors, currentColor) {
 
